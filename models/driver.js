@@ -28,6 +28,10 @@ const driverSchema = new mongoose.Schema({
       required:true,
       select : true,
     },
+  //   userId: {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: 'User'
+  // },
   });
   
   driverSchema.pre("save", async function (next) {

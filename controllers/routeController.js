@@ -3,18 +3,15 @@ const User = require("../models/User"); // Import User model
 const Customer = require("../models/customer"); // Import Customer model
 const Driver = require("../models/driver");
 
-
 exports.createRoute = async (req, res) => {
   try {
     const { name, customers, userId, driverId } = req.body;
 
     // Check if all required fields are provided
     if (!name || !customers || !userId || !driverId) {
-      return res
-        .status(400)
-        .json({
-          error: "Name, customers, user ID, and driver ID are required",
-        });
+      return res.status(400).json({
+        error: "Name, customers, user ID, and driver ID are required",
+      });
     }
 
     // Check if the user and driver exist
@@ -26,7 +23,11 @@ exports.createRoute = async (req, res) => {
     }
     const existingRoute = await Route.findOne({ name, user: userId });
     if (existingRoute) {
-      return res.status(401).json({ error: "Route name must be unique,Try With Different Route Name." });
+      return res
+        .status(401)
+        .json({
+          error: "Route name must be unique,Try With Different Route Name.",
+        });
     }
     // Iterate over the customers array and push each customer ID to the route's customers array
     const customerIds = [];
@@ -54,7 +55,6 @@ exports.createRoute = async (req, res) => {
     res.status(500).json({ error: "Error creating route" });
   }
 };
-
 
 exports.updateRouteWithCustomersFromAdmin = async (req, res) => {
   try {
@@ -87,16 +87,21 @@ exports.updateRouteWithCustomersFromAdmin = async (req, res) => {
     }
     // Save the route
     await route.save();
-    res.status(201).json({ success: true, message: 'Customers added to route successfully', route });
+    res
+      .status(201)
+      .json({
+        success: true,
+        message: "Customers added to route successfully",
+        route,
+      });
     return route;
   } catch (error) {
     console.error("Error updating route with customers:", error);
-    res.status(500).json({ error: 'Error updating route with customers' });
+    res.status(500).json({ error: "Error updating route with customers" });
   }
 };
 
-
-exports.updateRouteWithCustomers = async (req,res) => {
+exports.updateRouteWithCustomers = async (req, res) => {
   try {
     // Check if the user and driver exist
     const userId = req.params.adminId;
@@ -108,20 +113,30 @@ exports.updateRouteWithCustomers = async (req,res) => {
 
     const { name, email, mobileNo, location, address } = req.body.payload;
     if (!name || !email || !mobileNo || !location || !address) {
-      return res.status(400).json({message: 'All fields are required' });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     // Check if a customer with the provided email already exists
-    const existingCustomer = await Customer.findOne({ email,userId });
+    const existingCustomer = await Customer.findOne({ email, userId });
     if (existingCustomer) {
-      return res.status(400).json({ message: 'Customer with this email already exists' });
+      return res
+        .status(400)
+        .json({ message: "Customer with this email already exists" });
     }
 
     // Create a new customer
-    const customer = new Customer({ name, email, mobileNo, location, address,userId,route:routeId });
+    const customer = new Customer({
+      name,
+      email,
+      mobileNo,
+      location,
+      address,
+      userId,
+      route: routeId,
+    });
     await customer.save();
     const customerId = customer._id;
-    
+
     if (!user) {
       throw new Error("User not found");
     }
@@ -135,16 +150,22 @@ exports.updateRouteWithCustomers = async (req,res) => {
     }
 
     // Iterate over the new customer IDs and add them to the route's customers array
-      
-      // if (!customer) {
-      //   throw new Error(`Customer with ID ${customerId} not found`);
-      // }
-      route.customers.addToSet(customerId); // Add customer ID to the customers array if it's not already present
-    
+
+    // if (!customer) {
+    //   throw new Error(`Customer with ID ${customerId} not found`);
+    // }
+    route.customers.addToSet(customerId); // Add customer ID to the customers array if it's not already present
 
     // Save the route
     await route.save();
-    res.status(201).json({ success: true, message: 'Customer created successfully', customer,route });
+    res
+      .status(201)
+      .json({
+        success: true,
+        message: "Customer created successfully",
+        customer,
+        route,
+      });
     return route;
   } catch (error) {
     console.error("Error updating route with customers:", error);
@@ -152,13 +173,11 @@ exports.updateRouteWithCustomers = async (req,res) => {
   }
 };
 
-
-
 exports.getRoutes = async (req, res) => {
   try {
-    const userId = req.body.userId
+    const userId = req.body.userId;
     // Fetch all routes from the database
-    const routes = await Route.find({user:userId});
+    const routes = await Route.find({ user: userId });
     // console.log(routes)
     // Return the routes
     res.status(200).json({ success: true, routes });
@@ -168,10 +187,23 @@ exports.getRoutes = async (req, res) => {
   }
 };
 
-
 exports.routesGet = async (req, res) => {
   try {
-    const routes = await Route.findById(req.params.id)
+    const routes = await Route.findById(req.params.id).populate(["customers","driver"])
+    res.status(200).json({ success: true, routes });
+  } catch (error) {
+    console.error("Error fetching routes:", error);
+    res.status(500).json({ error: "Error fetching routes" });
+  }
+};
+exports.routesUpdate = async (req, res) => {
+  try {
+    const {name,customer,driverId,} = req.body;
+    const routes = await Route.findById(req.params.id);
+    routes.name = name;
+    routes.customers=customer
+    routes.driver=driverId
+    await routes.save();
     res.status(200).json({ success: true, routes });
   } catch (error) {
     console.error("Error fetching routes:", error);
@@ -188,7 +220,7 @@ exports.getRouteAndCustomerForDriver = async (req, res) => {
     }
     // Find routes associated with the driver ID
     const routes = await Route.find({ driver: driverId });
-    console.log("Routes :",routes)
+    console.log("Routes :", routes);
 
     if (!routes || routes.length === 0) {
       return res.status(404).json({ error: "Routes not found for the driver" });
@@ -197,52 +229,54 @@ exports.getRouteAndCustomerForDriver = async (req, res) => {
     const customersByRoute = [];
     for (const route of routes) {
       const customerArr = [];
-      const coordinates =[];
+      const coordinates = [];
       const marker = [];
       const markerStatus = [];
       for (const customerId of route.customers) {
-        
         await Customer.find({ _id: customerId })
-        .then((customer) => {
-          customerArr.push(customer[0]);
-          console.log("check1 :", customer);
-          if(customer[0].location){
-            
-            const [latitude, longitude] = customer[0].location.split(',');
-            coordinates.push({ latitude, longitude });
-            const markerChild = {
-              id:customer[0]._id,
-              title:customer[0].name,
-              coordinates:{
-                latitude:parseFloat(latitude),
-                longitude:parseFloat(longitude)
-            },
-            details:{
-              name:customer[0].name,
-              address:customer[0].address,
-              phone:customer[0].mobileNo,
-              email:customer[0].email,
-              customer:customer[0]
-            },
-          }
-          const markerStatusChild = {
-            markerId:customerId,
-            delivered:customer[0].txnDate
-          }
-          markerStatus.push(markerStatusChild)
-          marker.push(markerChild)
-        }else{
-          console.log("location not found")
-        }
-          
-          
-          
-        })
-        .catch((error) => {
-          console.error("Error fetching customer data:", error);
-        });
+          .then((customer) => {
+            customerArr.push(customer[0]);
+            console.log("check1 :", customer);
+            if (customer[0].location) {
+              const [latitude, longitude] = customer[0].location.split(",");
+              coordinates.push({ latitude, longitude });
+              const markerChild = {
+                id: customer[0]._id,
+                title: customer[0].name,
+                coordinates: {
+                  latitude: parseFloat(latitude),
+                  longitude: parseFloat(longitude),
+                },
+                details: {
+                  name: customer[0].name,
+                  address: customer[0].address,
+                  phone: customer[0].mobileNo,
+                  email: customer[0].email,
+                  customer: customer[0],
+                },
+              };
+              const markerStatusChild = {
+                markerId: customerId,
+                delivered: customer[0].txnDate,
+              };
+              markerStatus.push(markerStatusChild);
+              marker.push(markerChild);
+            } else {
+              console.log("location not found");
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching customer data:", error);
+          });
       }
-      customersByRoute.push({ route, customerArr ,coordinates,marker,markerStatus,admin:route.user});
+      customersByRoute.push({
+        route,
+        customerArr,
+        coordinates,
+        marker,
+        markerStatus,
+        admin: route.user,
+      });
     }
     return res.status(201).json({ customersByRoute });
   } catch (error) {
@@ -250,8 +284,6 @@ exports.getRouteAndCustomerForDriver = async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 };
-
-
 
 exports.getDriverAdmin = async (req, res) => {
   try {
@@ -262,14 +294,15 @@ exports.getDriverAdmin = async (req, res) => {
     }
 
     // Find all routes where the driver is the specified driverId
-    const routes = await Route.find({ driver: driverId }).populate('user'); // Assuming the user field references the user who created the route
+    const routes = await Route.find({ driver: driverId }).populate("user"); // Assuming the user field references the user who created the route
 
     // Extract unique user information from the routes
     const users = [];
     const userIds = new Set(); // Using a Set to keep track of unique user IDs
     for (const route of routes) {
       const { _id, name, email } = route.user;
-      if (!userIds.has(_id)) { // Check if the user ID is already in the Set
+      if (!userIds.has(_id)) {
+        // Check if the user ID is already in the Set
         userIds.add(_id);
         users.push({ _id, name, email });
       }
