@@ -17,7 +17,7 @@ const routeSchema = new mongoose.Schema({
     }],
     driver: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Driver'
+      ref: 'driver'
     }
   });
 
