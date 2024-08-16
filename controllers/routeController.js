@@ -189,7 +189,7 @@ exports.getRoutes = async (req, res) => {
 
 exports.routesGet = async (req, res) => {
   try {
-    const routes = await Route.findById(req.params.id).populate(["customers","driver"])
+    const routes = await Route.findById(req.params.id).populate(["customers"])
     res.status(200).json({ success: true, routes });
   } catch (error) {
     console.error("Error fetching routes:", error);
