@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router();
 const { login,register } = require('../controllers/auth');
 
-const {createUser,getUserById,updateUser,deleteUser,verifyUserCredentials, addProductForUser, getProductsForUser, updateProductForUser, deleteProductForUser} = require('../controllers/userController');
+const {createUser,getUserById,updateUser,deleteUser,verifyUserCredentials, addProductForUser, getProductsForUser, updateProductForUser, deleteProductForUser, forgotPassword} = require('../controllers/userController');
 const { getAllProducts, addProduct } = require('../controllers/productController');
 
 // Create a new User
@@ -21,6 +21,8 @@ router.delete('/users/:id', deleteUser);
 // router.post('/products',addProduct);
 // router.get('/allproducts',getAllProducts)
 router.post('/users/verify', verifyUserCredentials);
+router.post('/users/passwordChanged', forgotPassword);
+
 router.get('/users/:userId/products',getProductsForUser)
 router.post('/users/:userId/products',addProductForUser)
 router.put('/users/:userId/products/:productId',updateProductForUser)

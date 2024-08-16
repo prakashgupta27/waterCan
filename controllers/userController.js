@@ -208,3 +208,34 @@ exports.deleteProductForUser = async (req, res) => {
     res.status(500).json({ error: 'Error deleting product for user.' });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email,password } = req.body;
+    console.log(req.body);
+    if (!email) {
+      return res
+        .status(200)
+        .json({error:"Please provide email"});
+    }
+    if (!password) {
+      return res
+        .status(200)
+        .json({error:"Please provide email"});
+    }
+    const admin = await User.findOne({
+      email: email,
+    });
+    if (!admin) {
+      return res
+        .status(200)
+        .json({error:"Email is not registered"});
+    }
+    admin.password = password
+    await admin.save();
+    res.status(200).json({success:true, message: 'Password changed', admin });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ error: 'Error ' }, );
+  }
+};
