@@ -21,9 +21,10 @@ const adminSchema = mongoose.Schema({
  
 });
 
-adminSchema.methods.correctPassword = async (dbPass, frontendPass) => {
-  return bcrypt.compare(frontendPass, dbPass);
+adminSchema.methods.matchPasswords = async function (password) {
+  return await bcrypt.compare(password, this.password);
 };
+
 
 adminSchema.methods.generateAdminAuthToken = function () {
   const token = jwt.sign({ _id: this._id }, "ultra-security", {

@@ -48,7 +48,7 @@ app.use('/api', customerRoutes);
 app.use('/api', routeRoutes);
 app.use('/api', transactionRoutes);
 app.use('/api', driverRoutes);
-
+app.use("/api/admin",require("./routes/adminRoutes"))
 
 
 
