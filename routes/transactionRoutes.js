@@ -17,5 +17,5 @@ router.get('/transaction/:userId/:customerId',customerTransactions);
 // Get a Transaction by ID
 // router.get('/transaction/:id', getTransactionById);
 
-
+console.log()
 module.exports=router;
